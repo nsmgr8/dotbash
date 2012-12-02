@@ -1,0 +1,39 @@
+[core]
+    whitespace = nowarn
+    pager = less
+[user]
+    name = M Nasimul Haque
+    email = nasim.haque@gmail.com
+[github]
+    user = nsmgr8
+[color]
+    ui = auto
+[alias]
+    co = checkout
+    cob = checkout -b
+    st = status
+    ci = commit
+    ca = commit -a
+    br = branch
+    ba = branch -a
+    df = diff
+    dc = diff --cached
+    amend = commit --amend
+    aa = add --all
+    dh1 = diff HEAD~1
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    h = !git lg -1
+    hp = "!git h && git show -p --pretty=\"tformat:\""
+    r = !git lg -10
+    p = !git checkout master && git pull origin master && git push origin master && git checkout -
+    pp = !git checkout develop && git pull origin develop && git push origin develop && git checkout -
+    spull = !git checkout master && git-svn fetch && git-svn rebase && git checkout - && git rebase master
+    spush = !git checkout master && git-svn dcommit && git checkout -
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[merge]
+	tool = vimdiff
