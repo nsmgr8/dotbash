@@ -234,17 +234,14 @@ if __name__ == '__main__':
     p = Powerline(mode='patched')
     cwd = os.getcwd()
     add_virtual_env_segment(p, cwd)
-    #p.append(Segment(powerline, ' \\u ', 250, 240))
-    #p.append(Segment(powerline, ' \\h ', 250, 238))
-    add_cwd_segment(p, cwd, 6)
-    add_repo_segment(p, cwd)
-    user = ' %s@%s ' % (os.getenv('USER'),
-                    os.uname()[1].split('.')[0])
     if os.getenv('USER') == 'root':
         fg, bg = 15, 160
     else:
-        fg, bg = 15, 236
-    p.append(Segment(p, user, fg, bg))
+        fg, bg = 250, 240
+    p.append(Segment(p, ' \\u ', fg, bg))
+    p.append(Segment(p, ' \\h ', 250, 238))
+    add_cwd_segment(p, cwd, 6)
+    add_repo_segment(p, cwd)
     p.append(Segment(p, ' ${debian_chroot:+$debian_chroot} ', 15, 240))
     sys.stdout.write(p.draw())
     p = Powerline(mode='patched')
