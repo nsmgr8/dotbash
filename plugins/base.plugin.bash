@@ -78,13 +78,13 @@ pri() {
 }
 
 quiet() {
-	$* &> /dev/null &
+    $* &> /dev/null &
 }
 
 banish-cookies() {
-	rm -r ~/.macromedia ~/.adobe
-	ln -s /dev/null ~/.adobe
-	ln -s /dev/null ~/.macromedia
+    rm -r ~/.macromedia ~/.adobe
+    ln -s /dev/null ~/.adobe
+    ln -s /dev/null ~/.macromedia
 }
 
 # disk usage per directory
@@ -109,11 +109,11 @@ usage ()
 
 # One thing todo
 function t() {
-	 if [[ "$*" == "" ]] ; then
-		 cat ~/.t
-	 else
-		 echo "$*" > ~/.t
-	 fi
+     if [[ "$*" == "" ]] ; then
+         cat ~/.t
+     else
+         echo "$*" > ~/.t
+     fi
 }
 
 # Checks for existence of a command
@@ -131,4 +131,10 @@ buf () {
 
 function rh {
   history | awk '{a[$2]++}END{for(i in a){print a[i] " " i}}' | sort -rn | head
+}
+
+function vless {
+    vv=$(vim --version | head -n1 | cut -d' ' -f5 | sed 's/\.//')
+    vc="/usr/share/vim/vim${vv}/macros/less.vim"
+    vim -u $vc $@
 }
