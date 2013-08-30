@@ -6,6 +6,7 @@ import subprocess
 import sys
 import re
 
+
 class Powerline:
     symbols = {
         'compatible': {
@@ -38,11 +39,14 @@ class Powerline:
         self.segments.append(segment)
 
     def draw(self):
-        return (''.join((s[0].draw(s[1]) for s in zip(self.segments, self.segments[1:]+[None])))
-            + self.reset).encode('utf-8')
+        return (''.join((s[0].draw(s[1])
+                         for s in zip(self.segments, self.segments[1:]+[None])))
+                + self.reset).encode('utf-8')
+
 
 class Segment:
-    def __init__(self, powerline, content, fg, bg, separator=None, separator_fg=None):
+    def __init__(self, powerline, content, fg, bg, separator=None,
+                 separator_fg=None):
         self.powerline = powerline
         self.content = content
         self.fg = fg
@@ -64,6 +68,7 @@ class Segment:
             self.powerline.fgcolor(self.separator_fg),
             self.separator))
 
+
 def add_cwd_segment(powerline, cwd, maxdepth):
     #powerline.append(' \\w ', 15, 237)
     home = os.getenv('HOME')
@@ -80,24 +85,28 @@ def add_cwd_segment(powerline, cwd, maxdepth):
         names = names[:1] + [u'\u2026'] + names[2-maxdepth:]
 
     for n in names[:-1]:
-        powerline.append(Segment(powerline, ' %s ' % n, 250, 237, powerline.separator_thin, 244))
+        powerline.append(Segment(powerline, ' %s ' % n, 250, 237,
+                                 powerline.separator_thin, 244))
     powerline.append(Segment(powerline, ' %s ' % names[-1], 254, 237))
 
+
 def get_hg_status():
-    has_modified_files = False
-    has_untracked_files = False
-    has_missing_files = False
-    output = subprocess.Popen(['hg', 'status'], stdout=subprocess.PIPE).communicate()[0]
+    has_modified = False
+    has_untracked = False
+    has_missing = False
+    output = subprocess.Popen(['hg', 'status'],
+                              stdout=subprocess.PIPE).communicate()[0]
     for line in output.split('\n'):
         if line == '':
             continue
         elif line[0] == '?':
-            has_untracked_files = True
+            has_untracked = True
         elif line[0] == '!':
-            has_missing_files = True
+            has_missing = True
         else:
-            has_modified_files = True
-    return has_modified_files, has_untracked_files, has_missing_files
+            has_modified = True
+    return has_modified, has_untracked, has_missing
+
 
 def add_hg_segment(powerline, cwd):
     green = 148
@@ -107,26 +116,29 @@ def add_hg_segment(powerline, cwd):
         return False
     bg = green
     fg = 0
-    has_modified_files, has_untracked_files, has_missing_files = get_hg_status()
-    if has_modified_files or has_untracked_files or has_missing_files:
+    has_modified, has_untracked, has_missing = get_hg_status()
+    if has_modified or has_untracked or has_missing:
         bg = red
         fg = 15
         extra = ''
-        if has_untracked_files:
+        if has_untracked:
             extra += '+'
-        if has_missing_files:
+        if has_missing:
             extra += '!'
         branch += (' ' + extra if extra != '' else '')
     powerline.append(Segment(powerline, ' %s ' % branch, fg, bg))
     return True
 
+
 def get_git_status():
     has_pending_commits = True
     has_untracked_files = False
     origin_position = ""
-    output = subprocess.Popen(['git', 'status', '--ignore-submodules'], stdout=subprocess.PIPE).communicate()[0]
+    output = subprocess.Popen(['git', 'status', '--ignore-submodules'],
+                              stdout=subprocess.PIPE).communicate()[0]
     for line in output.split('\n'):
-        origin_status = re.findall("Your branch is (ahead|behind).*?(\d+) comm", line)
+        origin_status = re.findall(
+            "Your branch is (ahead|behind).*?(\d+) comm", line)
         if len(origin_status) > 0:
             origin_position = " %d" % int(origin_status[0][1])
             if origin_status[0][0] == 'behind':
@@ -140,18 +152,21 @@ def get_git_status():
             has_untracked_files = True
     return has_pending_commits, has_untracked_files, origin_position
 
+
 def add_git_segment(powerline, cwd):
     green = 148
     red = 161
     #cmd = "git branch 2> /dev/null | grep -e '\\*'"
-    p1 = subprocess.Popen(['git', 'branch'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1 = subprocess.Popen(['git', 'branch'], stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
+    p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout,
+                          stdout=subprocess.PIPE)
     output = p2.communicate()[0].strip()
     if len(output) == 0:
         return False
     branch = output.rstrip()[2:]
-    has_pending_commits, has_untracked_files, origin_position = get_git_status()
-    branch += origin_position
+    has_pending_commits, has_untracked_files, origin_pos = get_git_status()
+    branch += origin_pos
     if has_untracked_files:
         branch += ' +'
     bg = green
@@ -162,8 +177,9 @@ def add_git_segment(powerline, cwd):
     powerline.append(Segment(powerline, u' ⭠ %s ' % branch, fg, bg))
     return True
 
+
 def add_svn_segment(powerline, cwd):
-    if not os.path.exists(os.path.join(cwd,'.svn')):
+    if not os.path.exists(os.path.join(cwd, '.svn')):
         return
     '''svn info:
         First column: Says if item was added, deleted, or otherwise changed
@@ -182,8 +198,10 @@ def add_svn_segment(powerline, cwd):
     #TODO: Color segment based on above status codes
     try:
         #cmd = '"svn status | grep -c "^[ACDIMRX\\!\\~]"'
-        p1 = subprocess.Popen(['svn', 'info'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        p2 = subprocess.Popen(['grep', '^URL:'], stdin=p1.stdout, stdout=subprocess.PIPE)
+        p1 = subprocess.Popen(['svn', 'info'], stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        p2 = subprocess.Popen(['grep', '^URL:'], stdin=p1.stdout,
+                              stdout=subprocess.PIPE)
         output = p2.communicate()[0].strip()
         if '/trunk/' in output:
             output = 'trunk'
@@ -201,10 +219,12 @@ def add_svn_segment(powerline, cwd):
         return False
     return True
 
+
 def add_repo_segment(powerline, cwd):
     for add_repo_segment in [add_git_segment, add_svn_segment, add_hg_segment]:
         try:
-            if add_repo_segment(p, cwd): return
+            if add_repo_segment(p, cwd):
+                return
         except subprocess.CalledProcessError:
             pass
         except OSError:
@@ -213,12 +233,12 @@ def add_repo_segment(powerline, cwd):
 
 def add_virtual_env_segment(powerline, cwd):
     env = os.getenv("VIRTUAL_ENV")
-    if env == None:
+    if env is None:
         return False
     env_name = os.path.basename(env)
     bg = 35
     fg = 22
-    powerline.append(Segment(powerline,' %s ' % env_name, fg, bg))
+    powerline.append(Segment(powerline, ' %s ' % env_name, fg, bg))
     return True
 
 
@@ -229,6 +249,7 @@ def add_root_indicator(powerline, error):
         fg = 15
         bg = 161
     powerline.append(Segment(powerline, ' \\t \\$ ', fg, bg))
+
 
 if __name__ == '__main__':
     p = Powerline(mode='patched')
