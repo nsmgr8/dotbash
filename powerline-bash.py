@@ -7,6 +7,10 @@ import sys
 import re
 
 
+def _decode(message):
+    return message.decode() if sys.version_info.major == 3 else message
+
+
 class Powerline:
     symbols = {
         'compatible': {
@@ -39,8 +43,8 @@ class Powerline:
         self.segments.append(segment)
 
     def draw(self):
-        return (''.join((s[0].draw(s[1])
-                         for s in zip(self.segments, self.segments[1:]+[None])))
+        return (''.join((s[0].draw(s[1]) for s in
+                         zip(self.segments, self.segments[1:]+[None])))
                 + self.reset).encode('utf-8')
 
 
@@ -94,8 +98,8 @@ def get_hg_status():
     has_modified = False
     has_untracked = False
     has_missing = False
-    output = subprocess.Popen(['hg', 'status'],
-                              stdout=subprocess.PIPE).communicate()[0]
+    p = subprocess.Popen(['hg', 'status'], stdout=subprocess.PIPE)
+    output = _decode(p.stdout.read())
     for line in output.split('\n'):
         if line == '':
             continue
@@ -134,8 +138,9 @@ def get_git_status():
     has_pending_commits = True
     has_untracked_files = False
     origin_position = ""
-    output = subprocess.Popen(['git', 'status', '--ignore-submodules'],
-                              stdout=subprocess.PIPE).communicate()[0]
+    p = subprocess.Popen(['git', 'status', '--ignore-submodules'],
+                         stdout=subprocess.PIPE)
+    output = _decode(p.stdout.read())
     for line in output.split('\n'):
         origin_status = re.findall(
             "Your branch is (ahead|behind).*?(\d+) comm", line)
@@ -161,7 +166,7 @@ def add_git_segment(powerline, cwd):
                           stderr=subprocess.PIPE)
     p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout,
                           stdout=subprocess.PIPE)
-    output = p2.communicate()[0].strip()
+    output = _decode(p2.communicate()[0].strip())
     if len(output) == 0:
         return False
     branch = output.rstrip()[2:]
@@ -202,7 +207,7 @@ def add_svn_segment(powerline, cwd):
                               stderr=subprocess.PIPE)
         p2 = subprocess.Popen(['grep', '^URL:'], stdin=p1.stdout,
                               stdout=subprocess.PIPE)
-        output = p2.communicate()[0].strip()
+        output = _decode(p2.communicate()[0].strip())
         if '/trunk/' in output:
             output = 'trunk'
         elif '/tags/releases/' in output:
@@ -264,10 +269,10 @@ if __name__ == '__main__':
     add_cwd_segment(p, cwd, 6)
     add_repo_segment(p, cwd)
     p.append(Segment(p, ' ${debian_chroot:+$debian_chroot} ', 15, 240))
-    sys.stdout.write(p.draw())
+    sys.stdout.write(_decode(p.draw()))
     p = Powerline(mode='patched')
     add_root_indicator(p, sys.argv[1] if len(sys.argv) > 1 else 0)
     sys.stdout.write('\n')
-    sys.stdout.write(p.draw())
+    sys.stdout.write(_decode(p.draw()))
 
 # vim: set expandtab:
