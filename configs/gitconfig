@@ -29,6 +29,7 @@
     pp = !git checkout develop && git pull origin develop && git push origin develop && git checkout -
     spull = !git checkout master && git-svn fetch && git-svn rebase && git checkout - && git rebase master
     spush = !git checkout master && git-svn dcommit && git checkout -
+    root = rev-parse --show-toplevel
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
