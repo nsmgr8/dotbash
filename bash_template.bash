@@ -27,3 +27,14 @@ if [[ "$TERM" != "dumb" ]]; then # To prevent tput errors when someone scps to t
       done
     done
 fi
+
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+
+# OPAM configuration
+. /Users/nasim/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+export ANDROID_HOME=/usr/local/share/android-sdk
+export JAVA_HOME=/Library/Java/Home
+export ANDROID_HOME=/usr/local/share/android-sdk
+export JAVA_HOME=/Library/Java/Home
+export ANDROID_HOME=/usr/local/share/android-sdk
+export JAVA_HOME=/Library/Java/Home
