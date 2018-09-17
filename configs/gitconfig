@@ -1,6 +1,7 @@
 [core]
     whitespace = nowarn
     pager = less
+    editor = /Applications/MacVim.app/Contents/bin/vim
 [user]
     name = M Nasimul Haque
     email = nasim.haque@gmail.com
@@ -21,7 +22,7 @@
     amend = commit --amend
     aa = add --all
     dh1 = diff HEAD~1
-    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    lg = !git log --graph --pretty=format:'%Cred%h%Creset %Cgreen(%cr) %C(bold blue)<%an>%Creset %C(yellow)%d%Creset %s' --abbrev-commit --date=relative
     h = !git lg -1
     hp = "!git h && git show -p --pretty=\"tformat:\""
     r = !git lg -10
@@ -31,12 +32,17 @@
     spush = !git checkout master && git-svn dcommit && git checkout -
     root = rev-parse --show-toplevel
 [difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+    cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+    path = 
 [mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+    cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+    trustExitCode = true
 [merge]
-	tool = vimdiff
+    tool = vimdiff
 [push]
-	default = matching
+    default = matching
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
